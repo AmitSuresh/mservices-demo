@@ -7,6 +7,8 @@ import (
 	"github.com/AmitSuresh/grpc/infra/config"
 	"github.com/AmitSuresh/grpc/internal"
 	"github.com/AmitSuresh/grpc/internal/domain"
+	"github.com/AmitSuresh/grpc/internal/health"
+	hproto "github.com/AmitSuresh/grpc/proto/health"
 	"github.com/AmitSuresh/grpc/proto/order_service"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -46,6 +48,9 @@ func init() {
 	repo := domain.NewOrderRepo(l, db)
 	svr := internal.NewOrderService(repo, l)
 	order_service.RegisterOrderServiceServer(gs, svr)
+
+	healthSvr := health.NewHealthHandler(l)
+	hproto.RegisterHealthServer(gs, healthSvr)
 }
 
 func main() {
