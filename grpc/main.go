@@ -2,6 +2,7 @@ package main
 
 import (
 	"net"
+	"os"
 
 	"github.com/AmitSuresh/grpc/infra/config"
 	"github.com/AmitSuresh/grpc/internal"
@@ -38,15 +39,22 @@ func init() {
 	listener = li
 
 	reflection.Register(gs)
-	db.AutoMigrate(&domain.Order{})
+	err = db.AutoMigrate(&domain.Order{})
+	if err != nil {
+		l.Fatal("error while migrating", zap.Error(err))
+	}
 	repo := domain.NewOrderRepo(l, db)
 	svr := internal.NewOrderService(repo, l)
 	order_service.RegisterOrderServiceServer(gs, svr)
-
 }
 
 func main() {
-	defer l.Sync()
+	defer func() {
+		if err := l.Sync(); err != nil {
+			os.Exit(1)
+		}
+	}()
+
 	if err := gs.Serve(listener); err != nil {
 		zap.L().Fatal("failed to start grpc", zap.Error(err))
 	}
