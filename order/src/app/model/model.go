@@ -1,5 +1,11 @@
 package model
 
+import (
+	"sync"
+
+	"go.uber.org/zap"
+)
+
 type CreateOrder struct {
 	CustomerName string `json:"customer_name"`
 	Quantity     uint32 `json:"quantity"`
@@ -14,6 +20,10 @@ type OrderShipping struct {
 
 	//Order Order `gorm:"foreignKey:OrderId"`
 }
+type ShipmentDetails struct {
+	Mu     sync.Mutex
+	Orders []OrderShipping
+}
 
 /*
 type Order struct {
@@ -25,3 +35,10 @@ type Order struct {
 	ETA      string `gorm:"column:eta"`
 }
 */
+
+func ProcessOrderShipping(o *OrderShipping, so *ShipmentDetails, l *zap.Logger) {
+	so.Mu.Lock()
+	so.Orders = append(so.Orders, *o)
+	l.Info("updated Shipping list", zap.Any("Orders", so.Orders))
+	so.Mu.Unlock()
+}

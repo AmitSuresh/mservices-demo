@@ -1,10 +1,10 @@
 package main
 
 import (
+	"encoding/json"
 	"net/http"
 	"os"
 	"os/signal"
-	"sync"
 	"syscall"
 
 	"github.com/AmitSuresh/orderapi/src/app/controller"
@@ -20,13 +20,16 @@ import (
 )
 
 var (
-	cfg    *config.Config
-	l      *zap.Logger
-	server *http.Server
-	g      *gin.Engine
+	cfg           *config.Config
+	l             *zap.Logger
+	server        *http.Server
+	g             *gin.Engine
+	shippedOrders model.ShipmentDetails
+	TopicStr      string = "Shipping_Info"
 )
 
-func init() {
+func main() {
+
 	l, _ = zap.NewProduction()
 	cfg = config.LoadConfig(l)
 	g = gin.New()
@@ -38,6 +41,7 @@ func init() {
 	if err != nil {
 		l.Fatal("error starting new client", zap.Error(err))
 	}
+
 	grpcClient := order_service.NewOrderServiceClient(cc)
 	controller.CreateOrder(g, grpcClient)
 	server = &http.Server{
@@ -45,28 +49,11 @@ func init() {
 		Handler: g,
 	}
 
-}
-
-type Some struct {
-	mu     *sync.Mutex
-	Orders []*model.OrderShipping
-}
-
-/* func processOrderShipping(o *model.OrderShipping, so *Some) error {
-	so.mu.Lock()
-	so.Orders = append(so.Orders, o)
-	so.mu.Unlock()
-	return nil
-} */
-
-var MsgStr string = "Shipping_Info"
-
-func main() {
 	k, err := queue.NewConsumer(cfg, l)
 	if err != nil {
 		l.Fatal("error", zap.Error(err))
 	}
-	err = k.SubscribeTopics([]string{"Shipping_Info"}, nil)
+	err = k.SubscribeTopics([]string{TopicStr}, nil)
 	if err != nil {
 		l.Fatal("Failed to subscribe to topics", zap.Error(err))
 	}
@@ -80,6 +67,9 @@ func main() {
 		}
 	}()
 
+	go func() {
+
+	}()
 	for run {
 		ev := k.Poll(100)
 		switch e := ev.(type) {
@@ -89,6 +79,16 @@ func main() {
 				k.Commit()
 			}
 			l.Info("Message on", zap.Any("", e.Value))
+			switch *e.TopicPartition.Topic {
+			case TopicStr:
+				order := &model.OrderShipping{}
+				err := json.Unmarshal(e.Value, &order)
+				if err != nil {
+					l.Error("error unmarshalling msg", zap.Error(err))
+					continue
+				}
+				model.ProcessOrderShipping(order, &shippedOrders, l)
+			}
 
 		case kafka.PartitionEOF:
 			l.Info("Reached", zap.Any("", e))
@@ -96,7 +96,7 @@ func main() {
 			l.Error("Error", zap.Error(e))
 			run = false
 		default:
-			l.Info("Default", zap.Any("", e))
+			//l.Info("Default", zap.Any("", e))
 		}
 	}
 	k.Close()
