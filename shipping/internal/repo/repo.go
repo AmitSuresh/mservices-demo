@@ -21,6 +21,7 @@ type RepoHandler interface {
 }
 
 func NewRepo(l *zap.Logger, cfg *config.Config) RepoHandler {
+	l.Info("", zap.Any("cfg", cfg))
 	db, err := repo.NewDB(cfg)
 	if err != nil {
 		l.Fatal(err.Error())

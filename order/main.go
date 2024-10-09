@@ -34,7 +34,7 @@ func init() {
 	g.Use(gin.Recovery())
 	g.Use(gin.Logger())
 
-	cc, err := grpc.NewClient(":9082", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	cc, err := grpc.NewClient(cfg.GrpcAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		l.Fatal("error starting new client", zap.Error(err))
 	}
@@ -62,10 +62,6 @@ type Some struct {
 var MsgStr string = "Shipping_Info"
 
 func main() {
-	/* s := &Some{
-		mu:     &sync.Mutex{},
-		Orders: []*model.OrderShipping{},
-	} */
 	k, err := queue.NewConsumer(cfg, l)
 	if err != nil {
 		l.Fatal("error", zap.Error(err))
@@ -92,7 +88,6 @@ func main() {
 			if msg_count%2 == 0 {
 				k.Commit()
 			}
-			//l.Info("", zap.Any("", offsets))
 			l.Info("Message on", zap.Any("", e.Value))
 
 		case kafka.PartitionEOF:
@@ -105,23 +100,6 @@ func main() {
 		}
 	}
 	k.Close()
-	/* 	ticker := time.NewTicker(time.Second * 2)
-	   	defer ticker.Stop() // Ensure the ticker is stopped to free resources when done
-
-	   	// Use a select block to print so.Orders on each tick
-	   	go func() {
-	   		for range ticker.C {
-	   			// This block executes every 2 seconds
-	   			l.Info("Current Orders:")
-	   			s.mu.Lock()
-	   			if s.Orders != nil && len(s.Orders) > 0 {
-	   				for _, order := range s.Orders {
-	   					l.Info("Order ID: %s\n", zap.Any("", order.Id))
-	   				}
-	   			}
-	   			s.mu.Unlock()
-	   		}
-	   	}() */
 
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
