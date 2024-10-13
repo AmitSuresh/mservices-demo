@@ -1,0 +1,14 @@
+=== RUN   TestCreateOrder_Success
+[GIN] 2024/10/13 - 19:54:53 | 202 |      47.705µs |                 | POST     "/order"
+--- PASS: TestCreateOrder_Success (0.00s)
+=== RUN   TestCreateOrder_InvalidRequest
+[GIN] 2024/10/13 - 19:54:53 | 400 |      10.279µs |                 | POST     "/order"
+--- PASS: TestCreateOrder_InvalidRequest (0.00s)
+=== RUN   TestCreateOrder_AlreadyExists
+[GIN] 2024/10/13 - 19:54:53 | 400 |       6.623µs |                 | POST     "/order"
+--- PASS: TestCreateOrder_AlreadyExists (0.00s)
+=== RUN   TestCreateOrder_InvalidStruct
+[GIN] 2024/10/13 - 19:54:53 | 400 |       5.944µs |                 | POST     "/order"
+--- PASS: TestCreateOrder_InvalidStruct (0.00s)
+PASS
+ok  	github.com/AmitSuresh/orderapi/src/app/controller	0.006s

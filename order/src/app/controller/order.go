@@ -17,7 +17,7 @@ func CreateOrder(g *gin.Engine, client order_service.OrderServiceClient) {
 		var o model.CreateOrder
 
 		if err := c.BindJSON(&o); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error_message": err})
+			c.JSON(http.StatusBadRequest, gin.H{"error_message": "Invalid input: " + err.Error()})
 			return
 		}
 
@@ -31,17 +31,17 @@ func CreateOrder(g *gin.Engine, client order_service.OrderServiceClient) {
 			if s, ok := status.FromError(err); ok {
 				switch s.Code() {
 				case codes.AlreadyExists:
-					c.JSON(http.StatusBadRequest, s.Message())
+					c.JSON(http.StatusBadRequest, gin.H{"error_message": s.Message()})
 					return
 				case codes.InvalidArgument:
-					c.JSON(http.StatusBadRequest, s.Message())
+					c.JSON(http.StatusBadRequest, gin.H{"error_message": s.Message()})
 					return
 				default:
-					c.JSON(http.StatusBadRequest, s.Message())
+					c.JSON(http.StatusInternalServerError, gin.H{"error_message": s.Message()})
 					return
 				}
 			}
-			c.JSON(http.StatusInternalServerError, err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error_message": err})
 			return
 		}
 
