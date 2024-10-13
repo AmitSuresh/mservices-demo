@@ -5,17 +5,17 @@ package order_service;
 option go_package = "/order_service";
 
 service OrderService {
-    rpc CreateOrder(OrderReq) returns (OrderResp);
+  rpc CreateOrder(OrderReq) returns (OrderResp);
 }
 
 message OrderReq {
-    string Customer = 1;
-    uint32 Quantity = 2;
-    string Sku = 3;
+  string Customer = 1;
+  uint32 Quantity = 2;
+  string Sku = 3;
 }
 
 message OrderResp {
-    string Customer = 1;
-    string Id = 2;
-    bool Shipped = 3;
+  string Customer = 1;
+  string Id = 2;
+  bool Shipped = 3;
 }

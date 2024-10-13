@@ -7,10 +7,11 @@
 package order_service
 
 import (
-	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
-	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
 	sync "sync"
+
+	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
+	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 )
 
 const (
@@ -183,11 +184,13 @@ func file_order_service_proto_rawDescGZIP() []byte {
 	return file_order_service_proto_rawDescData
 }
 
-var file_order_service_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
-var file_order_service_proto_goTypes = []interface{}{
-	(*OrderReq)(nil),  // 0: order_service.OrderReq
-	(*OrderResp)(nil), // 1: order_service.OrderResp
-}
+var (
+	file_order_service_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+	file_order_service_proto_goTypes  = []interface{}{
+		(*OrderReq)(nil),  // 0: order_service.OrderReq
+		(*OrderResp)(nil), // 1: order_service.OrderResp
+	}
+)
 var file_order_service_proto_depIdxs = []int32{
 	0, // 0: order_service.OrderService.CreateOrder:input_type -> order_service.OrderReq
 	1, // 1: order_service.OrderService.CreateOrder:output_type -> order_service.OrderResp
